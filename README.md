@@ -1,17 +1,21 @@
 # Ad-Astra — lone-trail.com
 
-`lone-trail.com` 메인 홈페이지 프로토타입. 빌드 도구 없는 정적 사이트 + Cloudflare Pages Functions 하나로 이루어져 있습니다.
+`lone-trail.com` 메인 홈페이지 프로토타입. 빌드 도구 없는 정적 사이트 + Cloudflare Worker 하나로 이루어져 있습니다.
 
 ## 구성
 
 | 파일 | 역할 |
 | --- | --- |
-| `index.html` | 두 개의 전체 화면 패널 (히어로 / 영상), 스크롤 스냅 |
-| `styles.css` | 전체 스타일 |
-| `sky.js` | 드래그로 둘러보는 별 배경 (canvas), NASA APOD 레이어 로딩 |
-| `video.js` | 두 번째 패널의 YouTube 임베드 제어 |
-| `functions/api/apod.js` | NASA APOD API 프록시 (Cloudflare Pages Function) |
-| `_headers`, `_redirects` | 보안 헤더 / 캐시 / www → apex 리다이렉트 |
+| `public/index.html` | 두 개의 전체 화면 패널 (히어로 / 영상), 스크롤 스냅 |
+| `public/styles.css` | 전체 스타일 |
+| `public/sky.js` | 드래그로 둘러보는 별 배경 (canvas), NASA APOD 레이어 로딩 |
+| `public/video.js` | 두 번째 패널의 YouTube 임베드 제어 |
+| `public/_headers` | 보안 헤더 / CSP / 캐시 |
+| `worker/index.js` | 자산에 없는 경로만 처리하는 Worker 진입점 |
+| `worker/apod.js` | NASA APOD API 프록시 |
+| `wrangler.jsonc` | `public/`을 정적 자산으로, `worker/`를 코드로 묶는 설정 |
+
+`public/` 안의 파일만 웹에 올라갑니다. `.git`, `README.md`, Worker 소스는 업로드 대상이 아니라 노출되지 않습니다.
 
 ## 화면
 
@@ -22,16 +26,14 @@
 
 별 자체는 브라우저에서 직접 그립니다. 고정 시드를 쓰기 때문에 누가 접속해도 같은 하늘이 나오고, **외부 API가 죽어도 배경은 항상 동작합니다.**
 
-그 뒤에 NASA의 **APOD(오늘의 천체 사진)** 이미지가 은은하게 깔립니다. 이 이미지는 `/api/apod`를 통해 가져오며, 실제 NASA 호출은 Cloudflare 엣지에서 일어납니다 — API 키가 브라우저로 내려가지 않고, 응답은 30분간 엣지에 캐시되어 방문자가 늘어도 NASA 호출은 한 번입니다. 호출이 실패하면 별 배경만 조용히 남습니다.
+그 뒤에 NASA의 **APOD(오늘의 천체 사진)** 이미지가 은은하게 깔립니다. 이 이미지는 `/api/apod`를 통해 가져오며, 실제 NASA 호출은 Worker에서 일어납니다 — API 키가 브라우저로 내려가지 않고, 응답은 30분간 엣지에 캐시되어 방문자가 늘어도 NASA 호출은 한 번입니다. 호출이 실패하면 별 배경만 조용히 남습니다.
 
 ## 로컬 실행
 
 ```bash
-# Functions(/api/apod)까지 포함해서 실행 — 실제 배포와 가장 가까움
-npx wrangler pages dev .
-
-# 정적 파일만 확인 (이 경우 /api/apod 는 404, 별 배경은 정상)
-python3 -m http.server 8788
+npm install wrangler
+npx wrangler dev            # 정적 자산 + /api/apod 까지 실제 배포와 동일하게 동작
+npx wrangler deploy --dry-run   # 설정 검증만
 ```
 
 배포 및 도메인 설정은 [CLOUDFLARE.md](./CLOUDFLARE.md) 참고.

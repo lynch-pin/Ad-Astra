@@ -1,16 +1,16 @@
-/* Cloudflare Pages Function — proxies NASA's Astronomy Picture of the Day.
+/* NASA Astronomy Picture of the Day, proxied.
  *
- * The key lives in the NASA_API_KEY environment variable, so it never reaches
- * the browser. Without one it falls back to NASA's DEMO_KEY, which is rate
- * limited to ~30 requests/hour per IP — fine for a prototype, not for traffic.
- * Responses are cached at the edge so one upstream call serves every visitor.
+ * The key lives in the NASA_API_KEY secret, so it never reaches the browser.
+ * Without one it falls back to NASA's DEMO_KEY, which is rate limited to ~30
+ * requests/hour per IP — fine for a prototype, not for traffic. Responses are
+ * cached at the edge so one upstream call serves every visitor.
  */
 
 const UPSTREAM = 'https://api.nasa.gov/planetary/apod';
 
 function json(body, status, cacheSeconds) {
   return new Response(JSON.stringify(body), {
-    status: status,
+    status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
       'cache-control': cacheSeconds
@@ -20,8 +20,15 @@ function json(body, status, cacheSeconds) {
   });
 }
 
-async function handleGet(context) {
-  const key = (context.env && context.env.NASA_API_KEY) || 'DEMO_KEY';
+export async function handleApod(request, env) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method Not Allowed', {
+      status: 405,
+      headers: { allow: 'GET, HEAD' },
+    });
+  }
+
+  const key = (env && env.NASA_API_KEY) || 'DEMO_KEY';
   const url = `${UPSTREAM}?thumbs=true&api_key=${encodeURIComponent(key)}`;
 
   let upstream;
@@ -64,14 +71,4 @@ async function handleGet(context) {
     200,
     1800
   );
-}
-
-export async function onRequest(context) {
-  if (context.request.method === 'GET' || context.request.method === 'HEAD') {
-    return handleGet(context);
-  }
-  return new Response('Method Not Allowed', {
-    status: 405,
-    headers: { allow: 'GET, HEAD' },
-  });
 }

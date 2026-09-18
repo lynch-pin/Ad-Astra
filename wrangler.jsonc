@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ad-astra",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-17",
+  "observability": { "enabled": true },
+  "assets": {
+    // Only this directory is uploaded. Keeping the site in public/ is what
+    // stops .git, the README and the Worker source from being served as files.
+    "directory": "./public",
+    "binding": "ASSETS"
+  }
+}
