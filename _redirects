@@ -1,0 +1,3 @@
+# Send www to the apex domain. Only takes effect once www.lone-trail.com is
+# added as a custom domain on the same Pages project.
+https://www.lone-trail.com/*  https://lone-trail.com/:splat  301

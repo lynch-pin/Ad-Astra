@@ -1,0 +1,299 @@
+/* ---------- base ---------- */
+:root {
+  --ink: #e9eefc;
+  --ink-dim: #8e9bc0;
+  --void: #04060d;
+  --edge: rgba(233, 238, 252, 0.16);
+  --panel-pad: clamp(1.25rem, 5vw, 4rem);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  background: var(--void);
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--ink);
+  background: var(--void);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+               "Helvetica Neue", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ---------- sky background ---------- */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 8%, #0b1024 0%, #06080f 46%, var(--void) 100%);
+}
+
+.sky__apod {
+  position: absolute;
+  inset: -8%;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: saturate(1.15) contrast(1.05) blur(1px);
+  transition: opacity 1.6s ease;
+  will-change: transform;
+}
+.sky__apod.is-ready { opacity: 0.34; }
+
+.sky__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* transparent drag surface, sits above the sky but below the content */
+.sky__grab {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: pan-y;          /* vertical touch still scrolls the page */
+  -webkit-tap-highlight-color: transparent;
+}
+.sky__grab:focus-visible { outline: 2px solid var(--edge); outline-offset: -4px; }
+.sky__grab.is-dragging { cursor: grabbing; }
+
+.sky__hint,
+.sky__readout {
+  position: fixed;
+  z-index: 3;
+  margin: 0;
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.sky__hint {
+  left: var(--panel-pad);
+  bottom: calc(var(--panel-pad) * 0.75);
+  display: grid;
+  gap: 0.35em;
+}
+.sky__hint-ko { text-transform: none; letter-spacing: 0.02em; opacity: 0.7; }
+.sky__readout {
+  right: var(--panel-pad);
+  bottom: calc(var(--panel-pad) * 0.75);
+  font-variant-numeric: tabular-nums;
+  text-transform: none;   /* uppercase would turn the alpha/delta glyphs into A/D */
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+}
+.is-hidden { opacity: 0 !important; }
+
+/* ---------- panels ---------- */
+main {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;   /* the drag surface underneath must stay reachable */
+}
+
+.panel {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 3vh, 2rem);
+  padding: var(--panel-pad);
+  pointer-events: none;          /* let drags fall through to the sky */
+}
+/* only genuinely interactive things swallow the pointer, so a drag that
+   starts on top of the headline still pans the sky */
+.scroll-cue,
+.player,
+.player__bar { pointer-events: auto; }
+
+/* ---------- hero ---------- */
+.hero__title {
+  margin: 0;
+  max-width: 18ch;
+  text-align: center;
+  font-size: clamp(1.9rem, 6.2vw, 4.4rem);
+  font-weight: 300;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  text-shadow: 0 0 40px rgba(4, 6, 13, 0.85), 0 2px 18px rgba(4, 6, 13, 0.9);
+}
+
+.hero__sub {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.5rem, 5vh, 3rem);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.scroll-cue:hover, .scroll-cue:focus-visible { color: var(--ink); }
+.scroll-cue__arrow {
+  width: 9px;
+  height: 9px;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(45deg);
+  animation: nudge 2.4s ease-in-out infinite;
+}
+@keyframes nudge {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.45; }
+  50%      { transform: rotate(45deg) translate(3px, 3px); opacity: 1; }
+}
+
+/* ---------- video ---------- */
+.player {
+  position: relative;
+  width: min(100%, 1100px);
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid var(--edge);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+.player iframe,
+.player .facade {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.facade {
+  padding: 0;
+  background: #000;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.facade__thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+.facade__play {
+  position: relative;
+  width: 74px;
+  height: 52px;
+  border-radius: 12px;
+  background: rgba(10, 12, 20, 0.72);
+  border: 1px solid var(--edge);
+  backdrop-filter: blur(6px);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.facade__play::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 52%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 9px 0 9px 15px;
+  border-color: transparent transparent transparent var(--ink);
+}
+.facade:hover .facade__play { background: rgba(30, 36, 56, 0.85); transform: scale(1.06); }
+
+.player__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+}
+
+.btn {
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+  background: rgba(16, 20, 34, 0.7);
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.btn:hover, .btn:focus-visible { background: rgba(36, 42, 64, 0.85); border-color: rgba(233, 238, 252, 0.35); }
+.btn--ghost { background: transparent; color: var(--ink-dim); }
+
+/* ---------- credits ---------- */
+.credits {
+  position: fixed;
+  z-index: 3;
+  top: calc(var(--panel-pad) * 0.7);
+  right: var(--panel-pad);
+  display: grid;
+  justify-items: end;
+  gap: 0.3em;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-dim);
+  text-align: right;
+  max-width: min(46ch, 50vw);
+  pointer-events: none;
+}
+.credits__apod { opacity: 0.75; text-transform: none; letter-spacing: 0.02em; }
+
+@media (max-width: 640px) {
+  .credits { max-width: 60vw; font-size: 0.6rem; }
+  .sky__readout { display: none; }
+
+  /* keep the hint clear of the scroll cue on narrow screens */
+  .sky__hint {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: calc(var(--panel-pad) * 0.75 + 5.2rem);
+    justify-items: center;
+    text-align: center;
+  }
+  .sky__hint-en { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .scroll-cue__arrow { animation: none; }
+  .sky__apod { transition: none; }
+}
