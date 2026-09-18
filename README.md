@@ -36,4 +36,15 @@ npx wrangler dev            # 정적 자산 + /api/apod 까지 실제 배포와 
 npx wrangler deploy --dry-run   # 설정 검증만
 ```
 
+## 저작 표기
+
+컨셉을 Arknights의 **Lone Trail(孤星)** 에서 가져왔기 때문에, 두 번째 화면 하단에 아래 문구를 표기합니다.
+
+> Inspired by *Arknights: Lone Trail*. Arknights © Hypergryph · Yostar.
+> An unofficial, non-commercial fan project. Not affiliated with or endorsed by the rights holders.
+
+사이트에 노출되는 문구는 전부 영어입니다. 이 문서들만 한국어입니다.
+
+## 로컬 실행 및 배포
+
 배포 및 도메인 설정은 [CLOUDFLARE.md](./CLOUDFLARE.md) 참고.

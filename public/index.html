@@ -25,10 +25,7 @@
 
 <button class="sky__grab" id="sky-grab" type="button" aria-label="Drag to look around the sky"></button>
 
-<p class="sky__hint" id="sky-hint">
-  <span class="sky__hint-en">Drag to look around</span>
-  <span class="sky__hint-ko" lang="ko">드래그해서 하늘을 둘러보세요</span>
-</p>
+<p class="sky__hint" id="sky-hint">Drag to look around</p>
 
 <p class="sky__readout" id="sky-readout" aria-hidden="true"></p>
 
@@ -54,19 +51,21 @@
     </div>
 
     <div class="player__bar">
-      <button class="btn" id="sound-btn" type="button" hidden>
-        <span lang="ko">소리 켜기</span> <span aria-hidden="true">/ Unmute</span>
-      </button>
+      <button class="btn" id="sound-btn" type="button" hidden>Unmute</button>
       <a class="btn btn--ghost" id="yt-link"
          href="https://www.youtube.com/watch?v=-s0conum7-Q"
          target="_blank" rel="noopener noreferrer">YouTube &#8599;</a>
     </div>
+
+    <p class="attribution">
+      Inspired by <em>Arknights: Lone Trail</em>. Arknights &copy; Hypergryph &middot; Yostar.<br>
+      An unofficial, non-commercial fan project. Not affiliated with or endorsed by the rights holders.
+    </p>
   </section>
 </main>
 
 <footer class="credits">
   <span id="apod-credit" class="credits__apod"></span>
-  <span class="credits__base">&copy; lone-trail</span>
 </footer>
 
 <script src="/sky.js" defer></script>

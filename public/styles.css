@@ -89,10 +89,7 @@ body {
 .sky__hint {
   left: var(--panel-pad);
   bottom: calc(var(--panel-pad) * 0.75);
-  display: grid;
-  gap: 0.35em;
 }
-.sky__hint-ko { text-transform: none; letter-spacing: 0.02em; opacity: 0.7; }
 .sky__readout {
   right: var(--panel-pad);
   bottom: calc(var(--panel-pad) * 0.75);
@@ -181,8 +178,9 @@ main {
 /* ---------- video ---------- */
 .player {
   position: relative;
-  width: min(100%, 1100px);
+  width: min(100%, 1100px, max(16rem, (100svh - 17rem) * 16 / 9));
   aspect-ratio: 16 / 9;
+  flex: 0 0 auto;
   border-radius: 14px;
   overflow: hidden;
   background: #000;
@@ -258,6 +256,19 @@ main {
 .btn:hover, .btn:focus-visible { background: rgba(36, 42, 64, 0.85); border-color: rgba(233, 238, 252, 0.35); }
 .btn--ghost { background: transparent; color: var(--ink-dim); }
 
+.attribution {
+  margin: 0;
+  max-width: 62ch;
+  text-align: center;
+  text-wrap: balance;
+  font-size: 0.66rem;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  opacity: 0.8;
+}
+.attribution em { font-style: italic; }
+
 /* ---------- credits ---------- */
 .credits {
   position: fixed;
@@ -286,10 +297,9 @@ main {
     right: auto;
     transform: translateX(-50%);
     bottom: calc(var(--panel-pad) * 0.75 + 5.2rem);
-    justify-items: center;
     text-align: center;
   }
-  .sky__hint-en { display: none; }
+  .attribution { font-size: 0.6rem; line-height: 1.7; }
 }
 
 @media (prefers-reduced-motion: reduce) {
